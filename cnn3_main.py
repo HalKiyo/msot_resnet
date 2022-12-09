@@ -6,18 +6,18 @@ import tensorflow as tf
 from tensorflow.python.framework.ops import disable_eager_execution
 from preprocess import load, shuffle, mask
 from model3 import build_model
-from gradcam import grad_cam, show_heatmap, image_preprocess
+from gradcam import image_preprocess, grad_cam, show_heatmap, average_heatmap
 
 disable_eager_execution()
 
 def main():
     #---1. dataset
-    train_flag = True#MODIFALABLE
+    save_flag = False#MODIFALABLE
     vsample = 1000#MODIFALABLE
-    tors = 'predictors_coarse_std_Apr_m'
+    tors = 'predictors_coarse_std_Apr_t'
     tant = 'pr_1x1_std_MJJASO_one'#MODIFALABLE
     savefile = f"/docker/mnt/d/research/D2/cnn3/train_val/{tors}-{tant}.pickle"
-    if exists(savefile) is True and train_flag is False:
+    if exists(savefile) is True and save_flag is False:
         with open(savefile, 'rb') as f:
             data = pickle.load(f)
         x_val, y_val = data['x_val'], data['y_val']
@@ -36,7 +36,7 @@ def main():
     model = build_model((lat, lon, val_nm))
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr), loss='mse', metrics=['mae'])
     weights_path = f"/docker/mnt/d/research/D2/cnn3/weights/{tors}-{tant}.h5"
-    if exists(weights_path) is True and train_flag is False:
+    if exists(weights_path) is True and save_flag is False:
         model.load_weights(weights_path)
     else:
         his = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs)
@@ -51,14 +51,15 @@ def main():
     plt.show()
 
     #---4. gradcam
-    index = 0#MODIFALABLE
+    index = 700#MODIFALABLE
     layer_name = 'conv2d_2'#MODIFALABLE
     preprocessed_image = image_preprocess(x_val, index)
     heatmap = grad_cam(model, preprocessed_image, y_val, layer_name, lat, lon)
-    show_heatmap(heatmap)
+    #show_heatmap(heatmap)
+    average_heatmap(x_val, model, y_val, layer_name, lat, lon, num=300)
 
     #---5. save environment
-    if train_flag is True:
+    if save_flag is True:
         model.save_weights(weights_path)
         dct = {'x_train': x_train, 'y_train': y_train,
                'x_val': x_val, 'y_val': y_val,
@@ -67,7 +68,7 @@ def main():
             pickle.dump(dct, f)
         print(f"{savefile} and weights are saved")
     else:
-        print(f"train_flag is {train_flag} not saved")
+        print(f"save_flag is {save_flag} not saved")
 
 if __name__ == '__main__':
     main()
