@@ -14,10 +14,10 @@ def image_preprocess(val, index):
     img = val.copy()
     x = img[index]
     x = np.expand_dims(x, axis=0)
-    x = preprocess_input(x)
+    #x = preprocess_input(x)
     return x
 
-def grad_cam(input_model, image, y_val, layer_name):
+def grad_cam(input_model, image, y_val, layer_name, lat, lon):
     pred_val = input_model.output[0]
     y_val = tf.convert_to_tensor(y_val.astype(np.float32))
     loss = K.mean(K.square(pred_val - y_val))
@@ -31,7 +31,7 @@ def grad_cam(input_model, image, y_val, layer_name):
     weights = np.mean(grads_val, axis=(0,1))
     #---4. multiply averaged channel weights to last output
     cam = np.dot(output, weights)
-    cam = cv2.resize(cam, (72, 24), cv2.INTER_LINEAR) #Modify here depending on input shape
+    cam = cv2.resize(cam, (lon, lat), cv2.INTER_LINEAR)#MODIFALABLE
     cam = np.maximum(cam, 0)
     heatmap = (cam - np.min(cam)) / (np.max(cam) - np.min(cam))
     return heatmap
