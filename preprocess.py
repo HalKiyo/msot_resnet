@@ -35,13 +35,3 @@ def shuffle(indata, outdata, vsample):
                          val_dct['model'], train_dct['year']) ])
     return x_train, y_train, x_val, y_val, train_dct, val_dct
 
-#def make_test(inkey, outkey):
-#    savedir = f"/docker/mnt/d/research/D2/resnet/test"
-#    save_predictors =f"{savedir}/{inkey}_1973-2014.npy"
-#    save_predictant =f"{savedir}/{outkey}_1973-2014.npy"
-#    predictors, predictant = load(inkey, outkey)
-#    x_test, y_test = np.empty((42, 24, 72, predictors.shape[-1])), np.empty(42)
-#    for i in range(42):
-#        x_test[i,:,:,:] = predictors[0+i, 172+i]
-#        y_test[i] = predictant[0+i, 172+i]
-
