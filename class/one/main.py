@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.python.framework.ops import disable_eager_execution
-from preprocess import load, shuffle, mask
+from util import load, shuffle, mask
 from model50 import ResNet
 from gradcam import grad_cam, show_heatmap, image_preprocess
 
@@ -16,7 +16,7 @@ def main():
     vsample = 1000#MODIFALABLE
     tors = 'predictors_coarse_std_Apr_msot'
     tant = 'pr_1x1_std_MJJASO_one_5'#MODIFALABLE
-    savefile = f"/docker/mnt/d/research/D2/resnet/train_val/{tors}-{tant}.pickle"
+    savefile = f"/docker/mnt/d/research/D2/resnet/train_val/class/{tors}-{tant}.pickle"
     if exists(savefile) is True and train_flag is False:
         with open(savefile, 'rb') as f:
             data = pickle.load(f)
@@ -31,12 +31,15 @@ def main():
     batch_size = 256#MODIFALABLE
     epochs = 10#MODIFALABLE
     lr = 0.0001#MODIFALABLE
-    val_nm = 4#MODIFALABLE
+    var_num = 4#MODIFALABLE
+    class_num = 5#MODIFALABLE
     lat, lon = 24, 72
-    model = ResNet((lat, lon, val_nm), 1)#MODIFALABLE
-    model = model.build(input_shape=(lat, lon, val_nm))
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr), loss='mse', metrics=['mae'])
-    weights_path = f"/docker/mnt/d/research/D2/resnet/weights/{tors}-{tant}.h5"
+    optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+    loss = tf.keras.losses.SparseCategoricalCrossentropy()
+    model = ResNet((lat, lon, var_num), class_num)
+    model = model.build(input_shape=(lat, lon, var_num))
+    model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
+    weights_path = f"/docker/mnt/d/research/D2/resnet/weights/class/{tors}-{tant}.h5"
     if exists(weights_path) is True and train_flag is False:
         model.load_weights(weights_path)
     else:
@@ -67,7 +70,7 @@ def main():
             pickle.dump(dct, f)
         print(f"{savefile} and weights are saved")
     else:
-        print(f"train_flag is {train_flag} not saved")
+        print(f"train_flag is {train_flag}: not saved")
 
 if __name__ == '__main__':
     main()

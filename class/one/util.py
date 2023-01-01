@@ -3,7 +3,7 @@ import numpy.ma as ma
 
 def load(inkey, outkey):
     infile = f"/docker/mnt/d/research/D2/resnet/predictors/{inkey}.npy"
-    outfile = f"/docker/mnt/d/research/D2/resnet/predictant/{outkey}.npy"
+    outfile = f"/docker/mnt/d/research/D2/resnet/predictant/class/{outkey}.npy"
     predictors = np.load(infile)
     predictant = np.load(outfile)
     return predictors, predictant
@@ -15,6 +15,7 @@ def mask(x):
     return f
 
 def shuffle(indata, outdata, vsample):
+    outdata = outdata.reshape(42, 165)
     random_number = indata.shape[1]*indata.shape[2]
     random_index = np.random.choice(random_number, random_number, replace=False)
 

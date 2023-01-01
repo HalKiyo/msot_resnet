@@ -16,7 +16,7 @@ def main():
     vsample = 1000#MODIFALABLE
     tors = 'predictors_coarse_std_Apr_msot'
     tant = 'pr_1x1_std_MJJASO_one_5'#MODIFALABLE
-    savefile = f"/docker/mnt/d/research/D2/resnet/train_val/{tors}-{tant}.pickle"
+    savefile = f"/docker/mnt/d/research/D2/resnet/train_val/continuous/{tors}-{tant}.pickle"
     if exists(savefile) is True and train_flag is False:
         with open(savefile, 'rb') as f:
             data = pickle.load(f)
@@ -36,7 +36,7 @@ def main():
     model = ResNet((lat, lon, val_nm), 1)#MODIFALABLE
     model = model.build(input_shape=(lat, lon, val_nm))
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr), loss='mse', metrics=['mae'])
-    weights_path = f"/docker/mnt/d/research/D2/resnet/weights/{tors}-{tant}.h5"
+    weights_path = f"/docker/mnt/d/research/D2/resnet/weights/continuous/{tors}-{tant}.h5"
     if exists(weights_path) is True and train_flag is False:
         model.load_weights(weights_path)
     else:
