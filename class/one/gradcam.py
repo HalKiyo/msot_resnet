@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-from keras.applications.vgg16 import preprocess_input
+import keras
 import keras.backend as K
+from keras.layers.core import Lambda
+from keras.applications.vgg16 import preprocess_input
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -11,6 +13,12 @@ from matplotlib.colors import Normalize
 def normalize(x):
     return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
 
+def target_category_loss(x, category_index, class_num):
+    return tf.multiply(x, K.one_hot([category_index], class_num))
+
+def target_category_loss_output_shape(input_shape):
+    return input_shape
+
 def image_preprocess(val, index):
     img = val.copy()
     x = img[index]
@@ -18,11 +26,14 @@ def image_preprocess(val, index):
     #x = preprocess_input(x)
     return x
 
-def grad_cam(input_model, image, y_val, layer_name, lat, lon):
-    pred_val = input_model.output[0]
-    y_val = tf.convert_to_tensor(y_val.astype(np.float32))
-    loss = K.mean(K.square(pred_val - y_val))
-    conv_output = input_model.get_layer(layer_name).output
+def grad_cam(input_model, image, y_val, layer_name, lat, lon, class_num):
+    #---1. claculate loss of predicted class
+    target_layer = lambda x:target_category_loss(x, y_val, class_num)
+    x = input_model.layers[-1].output
+    x = Lambda(target_layer, output_shape=target_category_loss_output_shape)(x)
+    model = keras.models.Model(input_model.layers[0].input, x)
+    loss = K.sum(model.layers[-1].output)
+    conv_output = [l for l in model.layers if l.name is layer_name][0].output
     #---2. gradient from loss to last conv layer
     grads = normalize(K.gradients(loss, conv_output)[0])
     inp = input_model.layers[0].input
@@ -51,11 +62,11 @@ def show_heatmap(heatmap):
     cbar = fig.colorbar(mat, ax=ax, orientation='horizontal')
     plt.show()
 
-def average_heatmap(x_val, input_model, y_val, layer_name, lat, lon, num=300):
+def average_heatmap(x_val, input_model, y_val, layer_name, lat, lon, class_num, num=300):
     saliency = np.empty(x_val.shape[:3])[:num,:,:]
     for i in range(num):
         preprocessed_input = image_preprocess(x_val, index=i)
-        heatmap = grad_cam(input_model, preprocessed_input, y_val, layer_name, lat, lon)
+        heatmap = grad_cam(input_model, preprocessed_input, y_val, layer_name, lat, lon, class_num)
         saliency[i,:,:] = heatmap
         if i%100 == 0:
             print(f"validation_sample_number: {i}")
