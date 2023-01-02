@@ -57,7 +57,8 @@ def main():
     #---4. gradcam
     index = 100#MODIFALABLE
     preprocessed_image = image_preprocess(x_val, index)
-    heatmap = grad_cam(model, preprocessed_image, y_val, 'res__block_15', lat, lon)
+    heatmap = grad_cam(model, preprocessed_image, y_val, 'res__block_15', 
+                       lat, lon, class_num=5)
     show_heatmap(heatmap)
 
     #---5. save environment
