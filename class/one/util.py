@@ -14,10 +14,12 @@ def mask(x):
     f = ma.filled(z, 0)
     return f
 
-def shuffle(indata, outdata, vsample):
+def shuffle(indata, outdata, vsample, seed):
+    rng = np.random.default_rng(seed)
+
     outdata = outdata.reshape(42, 165)
     random_number = indata.shape[1]*indata.shape[2]
-    random_index = np.random.choice(random_number, random_number, replace=False)
+    random_index = rng.choice(random_number, random_number, replace=False)
 
     train_index = random_index[:-vsample]
     train_dct = {'model': train_index//indata.shape[2],

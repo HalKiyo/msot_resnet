@@ -1,16 +1,15 @@
 import sys
 sys.path.append("/docker/home/hasegawa/docker-gpu/msot-resnet/class/one/model/")
-from os.path import exists
+
 import pickle
 import numpy as np
-import matplotlib.pyplot as plt
 import tensorflow as tf
-
-from tensorflow.keras.utils import to_categorical
+from os.path import exists
 from tensorflow.python.framework.ops import disable_eager_execution
 
-from util import load, shuffle, mask
 from model50 import ResNet
+from view import draw_val
+from util import load, shuffle, mask
 from gradcam import grad_cam, show_heatmap, image_preprocess
 
 disable_eager_execution()
@@ -19,6 +18,7 @@ def main():
     #---0. initial setting
     train_flag = False#MODIFALABLE
     vsample = 1000#MODIFALABLE
+    seed = 1#MODIFALABLE
     class_num = 5#MODIFALABLE
     batch_size = 512#MODIFALABLE
     epochs = 5#MODIFALABLE
@@ -35,14 +35,14 @@ def main():
         with open(savefile, 'rb') as f:
             data = pickle.load(f)
         x_val, y_val = data['x_val'], data['y_val']
-        y_val_one_hot = to_categorical(y_val, class_num)
+        y_val_one_hot = tf.keras.utils.to_categorical(y_val, class_num)
     else:
         predictors, predictant = load(tors, tant)
-        x_train, y_train, x_val, y_val, train_dct, val_dct = shuffle(predictors, predictant, vsample)
+        x_train, y_train, x_val, y_val, train_dct, val_dct = shuffle(predictors, predictant, vsample, seed)
         x_train, x_val = mask(x_train), mask(x_val)
         x_train, x_val = x_train.transpose(0,2,3,1), x_val.transpose(0,2,3,1)
-        y_train_one_hot = to_categorical(y_train, class_num)
-        y_val_one_hot = to_categorical(y_val, class_num)
+        y_train_one_hot = tf.keras.utils.to_categorical(y_train, class_num)
+        y_val_one_hot = tf.keras.utils.to_categorical(y_val, class_num)
 
     #---2, training
     lat, lon = 24, 72
@@ -60,6 +60,10 @@ def main():
         #model.summary()
 
     #---3. test
+    results = model.evaluate(x_val, y_val_one_hot)
+    print(f"CategoricalAccuracy: {results[1]}")
+    pred_val = (model.predict(x_val))
+    draw_val(pred_val, y_val_one_hot)
 
     #---3. gradcam
     preprocessed_image = image_preprocess(x_val, gradcam_index)
@@ -67,7 +71,7 @@ def main():
                        lat, lon, class_num)
     show_heatmap(heatmap)
 
-    #---4. save environment
+    #---4. save state
     if train_flag is True:
         model.save_weights(weights_path)
         dct = {'x_train': x_train, 'y_train_one_hot': y_train_one_hot,

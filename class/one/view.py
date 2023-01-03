@@ -6,16 +6,16 @@ def draw_val(val_pred, val_label):
     ax = plt.subplot()
 
     val_list = [1, 2, 3, 4, 5]
-    width, linewidth, align = 0.4, 0, 'edge'
+    width, linewidth, align = 0.5, 0.5, 'center'
 
     # count
     val_true = []
     val_false = []
     for i, j in zip(val_pred, val_label):
         if np.argmax(i) == np.argmax(j):
-            val_true.append(val_list[np.argmax(i)])
+            val_true.append(val_list[np.argmax(j)])
         else:
-            val_false.append(val_list[np.argmax(i)])
+            val_false.append(val_list[np.argmax(j)])
 
     # true
     val_tcount = [val_true.count(j) for j in val_list]
