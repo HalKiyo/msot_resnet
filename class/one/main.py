@@ -1,12 +1,16 @@
+import sys
+sys.path.append("/docker/home/hasegawa/docker-gpu/msot-resnet/class/one/model/")
 from os.path import exists
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
+
 from tensorflow.keras.utils import to_categorical
 from tensorflow.python.framework.ops import disable_eager_execution
+
 from util import load, shuffle, mask
-from model/model50 import ResNet
+from model50 import ResNet
 from gradcam import grad_cam, show_heatmap, image_preprocess
 
 disable_eager_execution()
@@ -55,7 +59,7 @@ def main():
         his = model.fit(x_train, y_train_one_hot, batch_size=batch_size, epochs=epochs)
         #model.summary()
 
-
+    #---3. test
 
     #---3. gradcam
     preprocessed_image = image_preprocess(x_val, gradcam_index)
@@ -74,6 +78,7 @@ def main():
         print(f"{savefile} and weights are saved")
     else:
         print(f"train_flag is {train_flag}: not saved")
+
 
 if __name__ == '__main__':
     main()
