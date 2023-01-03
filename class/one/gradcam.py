@@ -14,7 +14,7 @@ def normalize(x):
     return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
 
 def target_category_loss(x, category_index, class_num):
-    return tf.multiply(x, K.one_hot([category_index], class_num))
+    return tf.multiply(x, K.one_hot([np.uint8(category_index)], class_num))
 
 def target_category_loss_output_shape(input_shape):
     return input_shape
@@ -26,14 +26,14 @@ def image_preprocess(val, index):
     #x = preprocess_input(x)
     return x
 
-def grad_cam(input_model, image, y_val, layer_name, lat, lon, class_num):
+def grad_cam(input_model, image, category_index, layer_name, lat, lon, class_num):
     #---1. claculate loss of predicted class
-    target_layer = lambda x:target_category_loss(x, y_val, class_num)
+    target_layer = lambda x: target_category_loss(x, category_index, class_num)
     x = input_model.layers[-1].output
     x = Lambda(target_layer, output_shape=target_category_loss_output_shape)(x)
     model = keras.models.Model(input_model.layers[0].input, x)
     loss = K.sum(model.layers[-1].output)
-    conv_output = [l for l in model.layers if l.name is layer_name][0].output
+    conv_output = [l for l in model.layers if l.name == layer_name][0].output
     #---2. gradient from loss to last conv layer
     grads = normalize(K.gradients(loss, conv_output)[0])
     inp = input_model.layers[0].input

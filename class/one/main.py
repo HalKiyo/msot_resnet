@@ -16,15 +16,16 @@ def main():
     train_flag = False#MODIFALABLE
     vsample = 1000#MODIFALABLE
     class_num = 5#MODIFALABLE
-    batch_size = 256#MODIFALABLE
-    epochs = 10#MODIFALABLE
+    batch_size = 512#MODIFALABLE
+    epochs = 5#MODIFALABLE
     lr = 0.0001#MODIFALABLE
     var_num = 4#MODIFALABLE
     gradcam_index = 100#MODIFALABLE
+    layer_name = 'res__block_3'#MODIFALABLE
 
     #---1. dataset
     tors = 'predictors_coarse_std_Apr_msot'
-    tant = 'pr_1x1_std_MJJASO_one_5'#MODIFALABLE
+    tant = 'pr_1x1_std_MJJASO_one_5'
     savefile = f"/docker/mnt/d/research/D2/resnet/train_val/class/{tors}-{tant}.pickle"
     if exists(savefile) is True and train_flag is False:
         with open(savefile, 'rb') as f:
@@ -54,9 +55,11 @@ def main():
         his = model.fit(x_train, y_train_one_hot, batch_size=batch_size, epochs=epochs)
         #model.summary()
 
+
+
     #---3. gradcam
     preprocessed_image = image_preprocess(x_val, gradcam_index)
-    heatmap = grad_cam(model, preprocessed_image, y_val, 'res__block_15', 
+    heatmap = grad_cam(model, preprocessed_image, y_val[gradcam_index], layer_name,
                        lat, lon, class_num)
     show_heatmap(heatmap)
 
