@@ -1,6 +1,5 @@
 import numpy as np
 import numpy.ma as ma
-import keras.backend as K
 
 def load(inkey, outkey):
     infile = f"/docker/mnt/d/research/D2/resnet/predictors/{inkey}.npy"
@@ -14,9 +13,6 @@ def mask(x):
     z = ma.masked_where(m==0, m)
     f = ma.filled(z, 0)
     return f
-
-def one_hot(x, class_num):
-    return K.one_hot([x], class_num)
 
 def shuffle(indata, outdata, vsample):
     outdata = outdata.reshape(42, 165)
