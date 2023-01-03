@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.keras.utils import to_categorical
 from tensorflow.python.framework.ops import disable_eager_execution
 from util import load, shuffle, mask
-from model50 import ResNet
+from model/model50 import ResNet
 from gradcam import grad_cam, show_heatmap, image_preprocess
 
 disable_eager_execution()
