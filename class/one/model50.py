@@ -58,7 +58,7 @@ class ResNet(tf.keras.Model):
                 [Res_Block(2048, 2048) for _ in range(3)],#1x3x2048
                 GlobalAveragePooling2D(),#2048
                 Dense(1000, activation='relu'),#1000
-                Dense(output_dim, activation='softmax')#1
+                Dense(output_dim, activation='softmax')#5
         ]
 
     def call(self, x):
