@@ -45,7 +45,10 @@ def grad_cam(input_model, image, category_index, layer_name, lat, lon, class_num
     cam = np.dot(output, weights)
     cam = cv2.resize(cam, (lon, lat), cv2.INTER_LINEAR)#MODIFALABLE
     cam = np.maximum(cam, 0)
-    heatmap = (cam - np.min(cam)) / (np.max(cam) - np.min(cam))
+    if np.max(cam) == np.min(cam):
+        heatmap = cam - min(cam)
+    else:
+        heatmap = (cam - np.min(cam)) / (np.max(cam) - np.min(cam))
     return heatmap
 
 def show_heatmap(heatmap):
