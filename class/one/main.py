@@ -74,8 +74,8 @@ def main():
     #---4. save state
     if train_flag is True:
         model.save_weights(weights_path)
-        dct = {'x_train': x_train, 'y_train_one_hot': y_train_one_hot,
-               'x_val': x_val, 'y_val_one_hot': y_val_one_hot,
+        dct = {'x_train': x_train, 'y_train': y_train,
+               'x_val': x_val, 'y_val': y_val,
                'train_dct': train_dct, 'val_dct': val_dct}
         with open(savefile, 'wb') as f:
             pickle.dump(dct, f)
